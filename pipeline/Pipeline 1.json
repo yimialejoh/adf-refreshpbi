@@ -1,0 +1,50 @@
+{
+	"name": "Pipeline 1",
+	"properties": {
+		"activities": [
+			{
+				"name": "token pbi capacity",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://login.microsoftonline.com/371ab23d-884c-40bd-b4d6-36bc3470ef62/oauth2/v2.0/token",
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/x-www-form-urlencoded"
+					},
+					"body": "client_id=6199b1d8-4a04-4abd-a974-9899945d6b44\n&scope=https://management.core.windows.net/.default\n&client_secret=qCU71gRBT1NM7xmtvxRkQvq-cP~c.~11p8\n&grant_type=client_credentials"
+				}
+			},
+			{
+				"name": "token pbi",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://login.microsoftonline.com/9a6f75ed-bc9a-49be-9deb-2a0f07483be9/oauth2/v2.0/token",
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/x-www-form-urlencoded"
+					},
+					"body": "client_id=6beb2800-c2ce-4540-993d-4bdccfa8d6be\n&scope=https://analysis.windows.net/powerbi/api/.default\n&client_secret=~waEt2Up7J2S_~6~5OIrTwoML~.~V6GDIJ\n&grant_type=client_credentials"
+				}
+			}
+		],
+		"annotations": []
+	}
+}
