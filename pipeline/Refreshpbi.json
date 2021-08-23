@@ -15,12 +15,18 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"url": "https://login.microsoftonline.com/371ab23d-884c-40bd-b4d6-36bc3470ef62/oauth2/v2.0/token",
+					"url": {
+						"value": "https://login.microsoftonline.com/@{pipeline().parameters.TenantID}/oauth2/v2.0/token",
+						"type": "Expression"
+					},
 					"method": "POST",
 					"headers": {
 						"Content-Type": "application/x-www-form-urlencoded"
 					},
-					"body": "client_id=6199b1d8-4a04-4abd-a974-9899945d6b44\n&scope=https://analysis.windows.net/powerbi/api/.default\n&client_secret=qCU71gRBT1NM7xmtvxRkQvq-cP~c.~11p8\n&grant_type=client_credentials"
+					"body": {
+						"value": "client_id=@{pipeline().parameters.APPClientID}\n&scope=https://analysis.windows.net/powerbi/api/.default\n&client_secret=@{pipeline().parameters.APPKey}\n&grant_type=client_credentials",
+						"type": "Expression"
+					}
 				}
 			},
 			{
@@ -43,7 +49,10 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes",
+					"url": {
+						"value": "https://api.powerbi.com/v1.0/myorg/groups/@{pipeline().parameters.WorkSpaceID}/datasets/@{pipeline().parameters.DatasetID}/refreshes",
+						"type": "Expression"
+					},
 					"method": "POST",
 					"headers": {
 						"Authorization": {
@@ -92,7 +101,10 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes/?$top=1",
+								"url": {
+									"value": "https://api.powerbi.com/v1.0/myorg/groups/@{pipeline().parameters.WorkSpaceID}/datasets/@{pipeline().parameters.DatasetID}/refreshes/?$top=1",
+									"type": "Expression"
+								},
 								"method": "GET",
 								"headers": {
 									"Authorization": {
