@@ -1,18 +1,11 @@
 {
-	"name": "Pipeline 1",
+	"name": "Refreshpbi",
 	"properties": {
 		"activities": [
 			{
-				"name": "token pbi capacity",
+				"name": "GetTokenAAD",
 				"type": "WebActivity",
-				"dependsOn": [
-					{
-						"activity": "Web1",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -27,36 +20,15 @@
 					"headers": {
 						"Content-Type": "application/x-www-form-urlencoded"
 					},
-					"body": "client_id=6199b1d8-4a04-4abd-a974-9899945d6b44\n&scope=https://management.core.windows.net/.default\n&client_secret=qCU71gRBT1NM7xmtvxRkQvq-cP~c.~11p8\n&grant_type=client_credentials"
+					"body": "client_id=6199b1d8-4a04-4abd-a974-9899945d6b44\n&scope=https://analysis.windows.net/powerbi/api/.default\n&client_secret=qCU71gRBT1NM7xmtvxRkQvq-cP~c.~11p8\n&grant_type=client_credentials"
 				}
 			},
 			{
-				"name": "token pbi",
-				"type": "WebActivity",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"url": "https://login.microsoftonline.com/9a6f75ed-bc9a-49be-9deb-2a0f07483be9/oauth2/v2.0/token",
-					"method": "POST",
-					"headers": {
-						"Content-Type": "application/x-www-form-urlencoded"
-					},
-					"body": "client_id=6beb2800-c2ce-4540-993d-4bdccfa8d6be\n&scope=https://analysis.windows.net/powerbi/api/.default\n&client_secret=~waEt2Up7J2S_~6~5OIrTwoML~.~V6GDIJ\n&grant_type=client_credentials"
-				}
-			},
-			{
-				"name": "Web1",
+				"name": "RefreshPBI",
 				"type": "WebActivity",
 				"dependsOn": [
 					{
-						"activity": "token pbi",
+						"activity": "GetTokenAAD",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -71,15 +43,61 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"url": "https://api.powerbi.com/v1.0/myorg/groups/41899d11-1d6b-4180-8eb7-cc310c42de0f/datasets/20fb91eb-7fda-4291-8b35-d3d85789a054/refreshes",
+					"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes",
 					"method": "POST",
 					"headers": {
 						"Authorization": {
-							"value": "Bearer @{activity('token pbi').output.access_token}",
+							"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
 							"type": "Expression"
 						}
 					},
 					"body": "null"
+				}
+			},
+			{
+				"name": "Wait05Seg",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "RefreshPBI",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 5
+				}
+			},
+			{
+				"name": "GetLastRefreshStatus",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Wait05Seg",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes/?$top=1",
+					"method": "GET",
+					"headers": {
+						"Authorization": {
+							"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],
