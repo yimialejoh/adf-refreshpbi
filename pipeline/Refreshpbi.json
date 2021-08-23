@@ -24,169 +24,7 @@
 				}
 			},
 			{
-				"name": "If Condition1",
-				"type": "IfCondition",
-				"dependsOn": [
-					{
-						"activity": "GetLastRefreshStatusBefore",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"expression": {
-						"value": "@equals(activity('GetLastRefreshStatusBefore').output.value[0].status,'Unknown')",
-						"type": "Expression"
-					},
-					"ifFalseActivities": [
-						{
-							"name": "RefreshPBI",
-							"type": "WebActivity",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes",
-								"method": "POST",
-								"headers": {
-									"Authorization": {
-										"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
-										"type": "Expression"
-									}
-								},
-								"body": "null"
-							}
-						},
-						{
-							"name": "Until1",
-							"type": "Until",
-							"dependsOn": [
-								{
-									"activity": "RefreshPBI",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"expression": {
-									"value": "@not(equals(activity('GetLastRefreshStatus').output.value[0].status,'Unknown'))",
-									"type": "Expression"
-								},
-								"activities": [
-									{
-										"name": "GetLastRefreshStatus",
-										"type": "WebActivity",
-										"dependsOn": [
-											{
-												"activity": "WaitGetLastRefreshStatus",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes/?$top=1",
-											"method": "GET",
-											"headers": {
-												"Authorization": {
-													"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
-													"type": "Expression"
-												}
-											}
-										}
-									},
-									{
-										"name": "WaitGetLastRefreshStatus",
-										"type": "Wait",
-										"dependsOn": [],
-										"userProperties": [],
-										"typeProperties": {
-											"waitTimeInSeconds": 30
-										}
-									}
-								],
-								"timeout": "7.00:00:00"
-							}
-						}
-					],
-					"ifTrueActivities": [
-						{
-							"name": "UntilOtherRefresh",
-							"type": "Until",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"expression": {
-									"value": "@not(equals(activity('GetLastOtherRefreshStatus').output.value[0].status,'Unknown'))",
-									"type": "Expression"
-								},
-								"activities": [
-									{
-										"name": "GetLastOtherRefreshStatus",
-										"type": "WebActivity",
-										"dependsOn": [
-											{
-												"activity": "WaitGetLastRefreshStatusOtherRefresh",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"policy": {
-											"timeout": "7.00:00:00",
-											"retry": 0,
-											"retryIntervalInSeconds": 30,
-											"secureOutput": false,
-											"secureInput": false
-										},
-										"userProperties": [],
-										"typeProperties": {
-											"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes/?$top=1",
-											"method": "GET",
-											"headers": {
-												"Authorization": {
-													"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
-													"type": "Expression"
-												}
-											}
-										}
-									},
-									{
-										"name": "WaitGetLastRefreshStatusOtherRefresh",
-										"type": "Wait",
-										"dependsOn": [],
-										"userProperties": [],
-										"typeProperties": {
-											"waitTimeInSeconds": 30
-										}
-									}
-								],
-								"timeout": "7.00:00:00"
-							}
-						}
-					]
-				}
-			},
-			{
-				"name": "GetLastRefreshStatusBefore",
+				"name": "RefreshPBI",
 				"type": "WebActivity",
 				"dependsOn": [
 					{
@@ -205,14 +43,76 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes/?$top=1",
-					"method": "GET",
+					"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes",
+					"method": "POST",
 					"headers": {
 						"Authorization": {
 							"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
 							"type": "Expression"
 						}
+					},
+					"body": "null"
+				}
+			},
+			{
+				"name": "Until1",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "RefreshPBI",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@not(equals(activity('GetLastRefreshStatus').output.value[0].status,'Unknown'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "GetLastRefreshStatus",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "WaitRefreshStatus",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes/?$top=1",
+								"method": "GET",
+								"headers": {
+									"Authorization": {
+										"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "WaitRefreshStatus",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 30
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
 				}
 			}
 		],
