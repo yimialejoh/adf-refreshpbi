@@ -130,19 +130,24 @@
 		],
 		"parameters": {
 			"TenantID": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "371ab23d-884c-40bd-b4d6-36bc3470ef62"
 			},
 			"APPClientID": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "6199b1d8-4a04-4abd-a974-9899945d6b44"
 			},
 			"APPKey": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "qCU71gRBT1NM7xmtvxRkQvq-cP~c.~11p8"
 			},
 			"WorkSpaceID": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "95e75c71-0989-4f17-ab47-8a84cfaee0f1"
 			},
 			"DatasetID": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "889ab806-4703-4a81-82f1-5747c153535d"
 			}
 		},
 		"variables": {
