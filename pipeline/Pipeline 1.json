@@ -5,7 +5,14 @@
 			{
 				"name": "token pbi capacity",
 				"type": "WebActivity",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Web1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -42,6 +49,37 @@
 						"Content-Type": "application/x-www-form-urlencoded"
 					},
 					"body": "client_id=6beb2800-c2ce-4540-993d-4bdccfa8d6be\n&scope=https://analysis.windows.net/powerbi/api/.default\n&client_secret=~waEt2Up7J2S_~6~5OIrTwoML~.~V6GDIJ\n&grant_type=client_credentials"
+				}
+			},
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "token pbi",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://api.powerbi.com/v1.0/myorg/groups/41899d11-1d6b-4180-8eb7-cc310c42de0f/datasets/20fb91eb-7fda-4291-8b35-d3d85789a054/refreshes",
+					"method": "POST",
+					"headers": {
+						"Authorization": {
+							"value": "Bearer @{activity('token pbi').output.access_token}",
+							"type": "Expression"
+						}
+					},
+					"body": "null"
 				}
 			}
 		],
