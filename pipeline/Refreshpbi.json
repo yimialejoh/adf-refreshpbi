@@ -71,8 +71,8 @@
 				}
 			},
 			{
-				"name": "GetLastRefreshStatus",
-				"type": "WebActivity",
+				"name": "Until1",
+				"type": "Until",
 				"dependsOn": [
 					{
 						"activity": "Wait05Seg",
@@ -81,26 +81,62 @@
 						]
 					}
 				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
 				"typeProperties": {
-					"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes/?$top=1",
-					"method": "GET",
-					"headers": {
-						"Authorization": {
-							"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
-							"type": "Expression"
+					"expression": {
+						"value": "@not(equals(activity('GetLastRefreshStatus').output.value[0].status,'Unknown'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "GetLastRefreshStatus",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes/?$top=1",
+								"method": "GET",
+								"headers": {
+									"Authorization": {
+										"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "WaitGetLastRefreshStatus",
+							"type": "Wait",
+							"dependsOn": [
+								{
+									"activity": "GetLastRefreshStatus",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 20
+							}
 						}
-					}
+					],
+					"timeout": "7.00:00:00"
 				}
 			}
 		],
+		"variables": {
+			"vara": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
