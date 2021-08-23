@@ -55,27 +55,11 @@
 				}
 			},
 			{
-				"name": "Wait05Seg",
-				"type": "Wait",
-				"dependsOn": [
-					{
-						"activity": "RefreshPBI",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"waitTimeInSeconds": 5
-				}
-			},
-			{
 				"name": "Until1",
 				"type": "Until",
 				"dependsOn": [
 					{
-						"activity": "Wait05Seg",
+						"activity": "RefreshPBI",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -91,7 +75,14 @@
 						{
 							"name": "GetLastRefreshStatus",
 							"type": "WebActivity",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "WaitGetLastRefreshStatus",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"policy": {
 								"timeout": "7.00:00:00",
 								"retry": 0,
@@ -114,14 +105,7 @@
 						{
 							"name": "WaitGetLastRefreshStatus",
 							"type": "Wait",
-							"dependsOn": [
-								{
-									"activity": "GetLastRefreshStatus",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
+							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"waitTimeInSeconds": 30
