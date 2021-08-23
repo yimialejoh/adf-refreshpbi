@@ -116,6 +116,23 @@
 				}
 			}
 		],
+		"parameters": {
+			"TenantID": {
+				"type": "string"
+			},
+			"APPClientID": {
+				"type": "string"
+			},
+			"APPKey": {
+				"type": "string"
+			},
+			"WorkSpaceID": {
+				"type": "string"
+			},
+			"DatasetID": {
+				"type": "string"
+			}
+		},
 		"variables": {
 			"vara": {
 				"type": "String"
