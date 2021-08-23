@@ -129,22 +129,22 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "Until1_copy1",
+							"name": "UntilOtherRefresh",
 							"type": "Until",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"expression": {
-									"value": "@not(equals(activity('GetLastRefreshStatus').output.value[0].status,'Unknown'))",
+									"value": "@not(equals(activity('GetLastOtherRefreshStatus').output.value[0].status,'Unknown'))",
 									"type": "Expression"
 								},
 								"activities": [
 									{
-										"name": "GetLastRefreshStatus_copy1",
+										"name": "GetLastOtherRefreshStatus",
 										"type": "WebActivity",
 										"dependsOn": [
 											{
-												"activity": "WaitGetLastRefreshStatus_copy1",
+												"activity": "WaitGetLastRefreshStatusOtherRefresh",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -170,7 +170,7 @@
 										}
 									},
 									{
-										"name": "WaitGetLastRefreshStatus_copy1",
+										"name": "WaitGetLastRefreshStatusOtherRefresh",
 										"type": "Wait",
 										"dependsOn": [],
 										"userProperties": [],
