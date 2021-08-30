@@ -1,0 +1,166 @@
+{
+	"name": "RefreshAAS",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetTokenAAD",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "https://login.microsoftonline.com/@{pipeline().parameters.TenantID}/oauth2/v2.0/token",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/x-www-form-urlencoded"
+					},
+					"body": {
+						"value": "client_id=@{pipeline().parameters.APPClientID}\n&scope=https://aspaaseastus2.asazure.windows.net/.default\n&client_secret=@{pipeline().parameters.APPKey}\n&grant_type=client_credentials",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "RefreshPBI",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "GetTokenAAD",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "https://aspaaseastus2.asazure.windows.net/servers/asdemolab001/models/adventureworks/refreshes",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Authorization": {
+							"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+							"type": "Expression"
+						}
+					},
+					"body": {
+						"Type": "Full",
+						"CommitMode": "transactional",
+						"MaxParallelism": 2,
+						"RetryCount": 2,
+						"Objects": []
+					}
+				}
+			},
+			{
+				"name": "Until1",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "RefreshPBI",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@not(equals(activity('GetLastRefreshStatus').output.value[0].status,'Unknown'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "GetLastRefreshStatus",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "WaitRefreshStatus",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "https://aspaaseastus2.asazure.windows.net/servers/asdemolab001/models/adventureworks/refreshes/e44fbd4f-54d4-4c9f-b37d-7b6e4e3467ed",
+									"type": "Expression"
+								},
+								"method": "GET",
+								"headers": {
+									"Authorization": {
+										"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "WaitRefreshStatus",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 30
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"TenantID": {
+				"type": "string",
+				"defaultValue": "371ab23d-884c-40bd-b4d6-36bc3470ef62"
+			},
+			"APPClientID": {
+				"type": "string",
+				"defaultValue": "21514f0b-c3da-4d28-8b3c-b92aa86716db"
+			},
+			"APPKey": {
+				"type": "string",
+				"defaultValue": "_3lXsTxFXK~94gj3ygcnP-6pgP1q._07.y"
+			},
+			"WorkSpaceID": {
+				"type": "string",
+				"defaultValue": "41899d11-1d6b-4180-8eb7-cc310c42de0f"
+			},
+			"DatasetID": {
+				"type": "string",
+				"defaultValue": "20fb91eb-7fda-4291-8b35-d3d85789a054"
+			}
+		},
+		"variables": {
+			"vara": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}
