@@ -15,40 +15,16 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"url": "https://aspaaseastus2.asazure.windows.net/servers/asdemolab001/models/adventureworks/refreshes",
-					"method": "GET",
+					"url": "https://api.powerbi.com/v1.0/myorg/groups/95e75c71-0989-4f17-ab47-8a84cfaee0f1/datasets/889ab806-4703-4a81-82f1-5747c153535d/refreshes",
+					"method": "POST",
 					"headers": {
-						"Authorization": "bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Im5PbzNaRHJPRFhFSzFqS1doWHNsSFJfS1hFZyIsImtpZCI6Im5PbzNaRHJPRFhFSzFqS1doWHNsSFJfS1hFZyJ9.eyJhdWQiOiJodHRwczovL2FzcGFhc2Vhc3R1czIuYXNhenVyZS53aW5kb3dzLm5ldCIsImlzcyI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzM3MWFiMjNkLTg4NGMtNDBiZC1iNGQ2LTM2YmMzNDcwZWY2Mi8iLCJpYXQiOjE2MzAzMzA0MTAsIm5iZiI6MTYzMDMzMDQxMCwiZXhwIjoxNjMwMzM0MzEwLCJhaW8iOiJFMlpnWUxqcGVXakN5aWJ2aU0rM0pueE8vaXM2Q1FBPSIsImFwcGlkIjoiMjE1MTRmMGItYzNkYS00ZDI4LThiM2MtYjkyYWE4NjcxNmRiIiwiYXBwaWRhY3IiOiIxIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvMzcxYWIyM2QtODg0Yy00MGJkLWI0ZDYtMzZiYzM0NzBlZjYyLyIsIm9pZCI6IjJkNTk2ODdjLWI0MjYtNDJmZi1hNTg2LTMzMzA5ZWQ5OTEzNyIsInJoIjoiMC5BUThBUGJJYU4weUl2VUMwMWphOE5IRHZZZ3RQVVNIYXd5aE5penk1S3FobkZ0c1BBQUEuIiwic3ViIjoiMmQ1OTY4N2MtYjQyNi00MmZmLWE1ODYtMzMzMDllZDk5MTM3IiwidGlkIjoiMzcxYWIyM2QtODg0Yy00MGJkLWI0ZDYtMzZiYzM0NzBlZjYyIiwidXRpIjoiQXZzd0J0WUhNMHFXTk1NYkFOMlhBQSIsInZlciI6IjEuMCJ9.fFV69pdkUe6Pf6EJCQiG-Tmty2-43VRDQtOKlzQyP8GCQKIAL_NInGWFlvGcFm32ZnSD9yLezOfMjWf-G_-H4mmOSfxeh_pyB1p0H70XAm998Vfq35P4gIbUq5ZCJ9Ni_Ly5QgiHc8k2XtHbcF2St8JJW0iH7WDWBgI-n83QkY1Zo30E43m8DClMP-d9kPkTrw2SWEdmwmckMRkX6mauQF6gzUZkF2ODA8W_igPSkEaW3MzFsqIp6w-wuxPu55nPaO17DgWNDdwiDsELXqa534iUDUbZBWj7IDsVBO5sr55dFafh-sTzeQANBNHNEws7ckaCfmNExm88Jyf1SWnf3A",
-						"Content-Type": "application/json"
-					}
-				}
-			},
-			{
-				"name": "Set variable1",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "Web1",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "response",
-					"value": {
-						"value": "@json(activity('Web1').output.Response)[0].status",
-						"type": "Expression"
-					}
+						"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6Im5PbzNaRHJPRFhFSzFqS1doWHNsSFJfS1hFZyIsImtpZCI6Im5PbzNaRHJPRFhFSzFqS1doWHNsSFJfS1hFZyJ9.eyJhdWQiOiJodHRwczovL2FuYWx5c2lzLndpbmRvd3MubmV0L3Bvd2VyYmkvYXBpIiwiaXNzIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvMzcxYWIyM2QtODg0Yy00MGJkLWI0ZDYtMzZiYzM0NzBlZjYyLyIsImlhdCI6MTYzMDAwNjAxNCwibmJmIjoxNjMwMDA2MDE0LCJleHAiOjE2MzAwMDk5MTQsImFjY3QiOjAsImFjciI6IjEiLCJhaW8iOiJFMlpnWUJCb04vR1lheFhxOUV6bCtDS0ZkWTFYTmlXZW1jQjlwWlBoeTM1NTcxb0xyd1VBIiwiYW1yIjpbInB3ZCJdLCJhcHBpZCI6IjdmNTlhNzczLTJlYWYtNDI5Yy1hMDU5LTUwZmM1YmIyOGI0NCIsImFwcGlkYWNyIjoiMiIsImZhbWlseV9uYW1lIjoiSGVycmVyYSBCdXN0YW1hbnRlIiwiZ2l2ZW5fbmFtZSI6IllpbWkgQWxlamFuZHJvIiwiaXBhZGRyIjoiMTkwLjI0MC4xMDcuMTY3IiwibmFtZSI6IllpbWkgQWxlamFuZHJvIEhlcnJlcmEgQnVzdGFtYW50ZSIsIm9pZCI6IjI2OTI3MGQ4LTY0NGEtNDM0ZS1iZGNjLTRjMzg4ZDAyYTRlMSIsInB1aWQiOiIxMDAzMjAwMEVGMzkwM0JBIiwicmgiOiIwLkFROEFQYklhTjB5SXZVQzAxamE4TkhEdlluT25XWC12THB4Q29GbFFfRnV5aTBRUEFGOC4iLCJzY3AiOiJ1c2VyX2ltcGVyc29uYXRpb24iLCJzdWIiOiJiUWd0MVFpdEdEc1NyVUpSOFMtLV9IZzl5VEdmTUFId0NOTUhFcDE0aVV3IiwidGlkIjoiMzcxYWIyM2QtODg0Yy00MGJkLWI0ZDYtMzZiYzM0NzBlZjYyIiwidW5pcXVlX25hbWUiOiJ5aW1pLmhlcnJlcmFAaWRhdGEuY29tLmNvIiwidXBuIjoieWltaS5oZXJyZXJhQGlkYXRhLmNvbS5jbyIsInV0aSI6Ik5KMEt4WnM2eGtHRFJFcENaLVVQQUEiLCJ2ZXIiOiIxLjAiLCJ3aWRzIjpbImI3OWZiZjRkLTNlZjktNDY4OS04MTQzLTc2YjE5NGU4NTUwOSJdfQ.e8WJRAIZRdN96nZvvfpqsZJh3h_ZPRmFuuUXZzXyM1uuhA8zRW8l7Tml2ulr0QSByQggurRgptd8A4q9L0LKk1MGp-0TQmjrQoqDdYB2FM-MudfXrIqqUb9zupAL-Mxt7cCTE85_sJvgPXUTcuRPvGelDyDyCjsFvv8ftnnIOrHcdjt5440AXh6pfaZtCGe6t63LXCmCL9VClKgAbyyoteBMj5Sd0eQCfTLdggnVuRR8U_C3En-D5Jb22LeqRBvvGg2zFZrsNq2KFdH1NA22ppE48lKy7Jzizo1E35ype8b5zRZaou7_9lsBPijFNzeCdPhCxvh7Kds6przKLnLMrw",
+						"Content-type": "application/json"
+					},
+					"body": "null"
 				}
 			}
 		],
-		"variables": {
-			"response": {
-				"type": "String"
-			}
-		},
 		"annotations": []
 	}
 }
