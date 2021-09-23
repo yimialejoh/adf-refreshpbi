@@ -9,7 +9,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "pipeline1",
+						"referenceName": "base",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
@@ -22,7 +22,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "pipeline1",
+						"referenceName": "base",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
@@ -35,7 +35,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "pipeline1",
+						"referenceName": "base",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
