@@ -1,0 +1,160 @@
+{
+	"name": "Refreshpbi",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetTokenAAD",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "https://login.microsoftonline.com/@{pipeline().parameters.TenantID}/oauth2/v2.0/token",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/x-www-form-urlencoded"
+					},
+					"body": {
+						"value": "client_id=@{pipeline().parameters.APPClientID}\n&scope=https://analysis.windows.net/powerbi/api/.default\n&client_secret=@{pipeline().parameters.APPKey}\n&grant_type=client_credentials",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "RefreshPBI",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "GetTokenAAD",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "https://api.powerbi.com/v1.0/myorg/groups/@{pipeline().parameters.WorkSpaceID}/datasets/@{pipeline().parameters.DatasetID}/refreshes",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Authorization": {
+							"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+							"type": "Expression"
+						}
+					},
+					"body": "null"
+				}
+			},
+			{
+				"name": "Until1",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "RefreshPBI",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@not(equals(activity('GetLastRefreshStatus').output.value[0].status,'Unknown'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "GetLastRefreshStatus",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "WaitRefreshStatus",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "https://api.powerbi.com/v1.0/myorg/groups/@{pipeline().parameters.WorkSpaceID}/datasets/@{pipeline().parameters.DatasetID}/refreshes/?$top=1",
+									"type": "Expression"
+								},
+								"method": "GET",
+								"headers": {
+									"Authorization": {
+										"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "WaitRefreshStatus",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 30
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			}
+		],
+		"parameters": {
+			"TenantID": {
+				"type": "string",
+				"defaultValue": "9a6f75ed-bc9a-49be-9deb-2a0f07483be9"
+			},
+			"APPClientID": {
+				"type": "string",
+				"defaultValue": "6beb2800-c2ce-4540-993d-4bdccfa8d6be"
+			},
+			"APPKey": {
+				"type": "string",
+				"defaultValue": "~waEt2Up7J2S_~6~5OIrTwoML~.~V6GDIJ"
+			},
+			"WorkSpaceID": {
+				"type": "string",
+				"defaultValue": "41899d11-1d6b-4180-8eb7-cc310c42de0f"
+			},
+			"DatasetID": {
+				"type": "string",
+				"defaultValue": "20fb91eb-7fda-4291-8b35-d3d85789a054"
+			}
+		},
+		"variables": {
+			"vara": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}

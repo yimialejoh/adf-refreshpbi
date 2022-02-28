@@ -1,0 +1,186 @@
+{
+	"name": "RefreshAAS",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetTokenAAD",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "https://login.microsoftonline.com/@{pipeline().parameters.TenantID}/oauth2/v2.0/token",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/x-www-form-urlencoded"
+					},
+					"body": {
+						"value": "client_id=@{pipeline().parameters.APPClientID}\n&scope=https://aspaaseastus2.asazure.windows.net/.default\n&client_secret=@{pipeline().parameters.APPKey}\n&grant_type=client_credentials",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "RefreshAAS",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "GetTokenAAD",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "https://aspaaseastus2.asazure.windows.net/servers/asdemolab001/models/pruebamodeloprocess/refreshes",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"headers": {
+						"Authorization": {
+							"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+							"type": "Expression"
+						},
+						"Content-Type": "application/json",
+						"Accept": "* / *"
+					},
+					"body": {
+						"Type": "Full",
+						"CommitMode": "transactional",
+						"MaxParallelism": 2,
+						"RetryCount": 2,
+						"Objects": []
+					}
+				}
+			},
+			{
+				"name": "Until1",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "RefreshAAS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@not(equals(json(activity('Getstatus').output.Response)[0].status,'inProgress'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "WaitRefreshStatus",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 30
+							}
+						},
+						{
+							"name": "Getstatus",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "WaitRefreshStatus",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": "https://aspaaseastus2.asazure.windows.net/servers/asdemolab001/models/adventureworks/refreshes",
+								"method": "GET",
+								"headers": {
+									"Authorization": {
+										"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+										"type": "Expression"
+									},
+									"Content-Type": "application/json"
+								}
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			},
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "RefreshAAS",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "response",
+					"value": {
+						"value": "@activity('RefreshAAS').output.data",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"TenantID": {
+				"type": "string",
+				"defaultValue": "371ab23d-884c-40bd-b4d6-36bc3470ef62"
+			},
+			"APPClientID": {
+				"type": "string",
+				"defaultValue": "21514f0b-c3da-4d28-8b3c-b92aa86716db"
+			},
+			"APPKey": {
+				"type": "string",
+				"defaultValue": "_3lXsTxFXK~94gj3ygcnP-6pgP1q._07.y"
+			},
+			"WorkSpaceID": {
+				"type": "string",
+				"defaultValue": "41899d11-1d6b-4180-8eb7-cc310c42de0f"
+			},
+			"DatasetID": {
+				"type": "string",
+				"defaultValue": "20fb91eb-7fda-4291-8b35-d3d85789a054"
+			}
+		},
+		"variables": {
+			"response": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}
