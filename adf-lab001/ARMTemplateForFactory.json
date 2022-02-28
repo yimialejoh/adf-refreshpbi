@@ -1,0 +1,422 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-lab001"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/RefreshAAS')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetTokenAAD",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "https://login.microsoftonline.com/@{pipeline().parameters.TenantID}/oauth2/v2.0/token",
+								"type": "Expression"
+							},
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/x-www-form-urlencoded"
+							},
+							"body": {
+								"value": "client_id=@{pipeline().parameters.APPClientID}\n&scope=https://aspaaseastus2.asazure.windows.net/.default\n&client_secret=@{pipeline().parameters.APPKey}\n&grant_type=client_credentials",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "RefreshAAS",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "GetTokenAAD",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "https://aspaaseastus2.asazure.windows.net/servers/asdemolab001/models/pruebamodeloprocess/refreshes",
+								"type": "Expression"
+							},
+							"method": "GET",
+							"headers": {
+								"Authorization": {
+									"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+									"type": "Expression"
+								},
+								"Content-Type": "application/json",
+								"Accept": "* / *"
+							},
+							"body": {
+								"Type": "Full",
+								"CommitMode": "transactional",
+								"MaxParallelism": 2,
+								"RetryCount": 2,
+								"Objects": []
+							}
+						}
+					},
+					{
+						"name": "Until1",
+						"type": "Until",
+						"dependsOn": [
+							{
+								"activity": "RefreshAAS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@not(equals(json(activity('Getstatus').output.Response)[0].status,'inProgress'))",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "WaitRefreshStatus",
+									"type": "Wait",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 30
+									}
+								},
+								{
+									"name": "Getstatus",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "WaitRefreshStatus",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": "https://aspaaseastus2.asazure.windows.net/servers/asdemolab001/models/adventureworks/refreshes",
+										"method": "GET",
+										"headers": {
+											"Authorization": {
+												"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+												"type": "Expression"
+											},
+											"Content-Type": "application/json"
+										}
+									}
+								}
+							],
+							"timeout": "7.00:00:00"
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "RefreshAAS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "response",
+							"value": {
+								"value": "@activity('RefreshAAS').output.data",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"TenantID": {
+						"type": "string",
+						"defaultValue": "371ab23d-884c-40bd-b4d6-36bc3470ef62"
+					},
+					"APPClientID": {
+						"type": "string",
+						"defaultValue": "21514f0b-c3da-4d28-8b3c-b92aa86716db"
+					},
+					"APPKey": {
+						"type": "string",
+						"defaultValue": "_3lXsTxFXK~94gj3ygcnP-6pgP1q._07.y"
+					},
+					"WorkSpaceID": {
+						"type": "string",
+						"defaultValue": "41899d11-1d6b-4180-8eb7-cc310c42de0f"
+					},
+					"DatasetID": {
+						"type": "string",
+						"defaultValue": "20fb91eb-7fda-4291-8b35-d3d85789a054"
+					}
+				},
+				"variables": {
+					"response": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Refreshpbi')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetTokenAAD",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "https://login.microsoftonline.com/@{pipeline().parameters.TenantID}/oauth2/v2.0/token",
+								"type": "Expression"
+							},
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/x-www-form-urlencoded"
+							},
+							"body": {
+								"value": "client_id=@{pipeline().parameters.APPClientID}\n&scope=https://analysis.windows.net/powerbi/api/.default\n&client_secret=@{pipeline().parameters.APPKey}\n&grant_type=client_credentials",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "RefreshPBI",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "GetTokenAAD",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "https://api.powerbi.com/v1.0/myorg/groups/@{pipeline().parameters.WorkSpaceID}/datasets/@{pipeline().parameters.DatasetID}/refreshes",
+								"type": "Expression"
+							},
+							"method": "POST",
+							"headers": {
+								"Authorization": {
+									"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+									"type": "Expression"
+								}
+							},
+							"body": "null"
+						}
+					},
+					{
+						"name": "Until1",
+						"type": "Until",
+						"dependsOn": [
+							{
+								"activity": "RefreshPBI",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@not(equals(activity('GetLastRefreshStatus').output.value[0].status,'Unknown'))",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "GetLastRefreshStatus",
+									"type": "WebActivity",
+									"dependsOn": [
+										{
+											"activity": "WaitRefreshStatus",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "https://api.powerbi.com/v1.0/myorg/groups/@{pipeline().parameters.WorkSpaceID}/datasets/@{pipeline().parameters.DatasetID}/refreshes/?$top=1",
+											"type": "Expression"
+										},
+										"method": "GET",
+										"headers": {
+											"Authorization": {
+												"value": "Bearer @{activity('GetTokenAAD').output.access_token}",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "WaitRefreshStatus",
+									"type": "Wait",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"waitTimeInSeconds": 30
+									}
+								}
+							],
+							"timeout": "7.00:00:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"TenantID": {
+						"type": "string",
+						"defaultValue": "9a6f75ed-bc9a-49be-9deb-2a0f07483be9"
+					},
+					"APPClientID": {
+						"type": "string",
+						"defaultValue": "6beb2800-c2ce-4540-993d-4bdccfa8d6be"
+					},
+					"APPKey": {
+						"type": "string",
+						"defaultValue": "~waEt2Up7J2S_~6~5OIrTwoML~.~V6GDIJ"
+					},
+					"WorkSpaceID": {
+						"type": "string",
+						"defaultValue": "41899d11-1d6b-4180-8eb7-cc310c42de0f"
+					},
+					"DatasetID": {
+						"type": "string",
+						"defaultValue": "20fb91eb-7fda-4291-8b35-d3d85789a054"
+					}
+				},
+				"variables": {
+					"vara": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/token pbi capacity')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "token pbi capacity",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://login.microsoftonline.com/371ab23d-884c-40bd-b4d6-36bc3470ef62/oauth2/v2.0/token",
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/x-www-form-urlencoded"
+							},
+							"body": "client_id=6199b1d8-4a04-4abd-a974-9899945d6b44\n&scope=https://management.core.windows.net/.default\n&client_secret=qCU71gRBT1NM7xmtvxRkQvq-cP~c.~11p8\n&grant_type=client_credentials"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/integrationRuntime1')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		}
+	]
+}
